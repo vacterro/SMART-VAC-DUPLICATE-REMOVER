@@ -1,0 +1,14 @@
+# Build artifacts
+build/
+dist/
+*.exe
+*.spec
+
+# Python
+__pycache__/
+*.pyc
+*.backup
+*.bak
+
+# Logs
+deleted_log.txt
