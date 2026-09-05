@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.3
+
+- Build: the PyInstaller recipe (`delete_duplicates_gui.spec`) is now tracked, so a fresh clone can reproduce the release build the documentation promises.
+- Hygiene: machine-local SAIPEN runtime state (recovery journals, locks, cache) is gitignored instead of being offered for commit.
+
 ## 0.0.2
 
 - Security (SRC-001 audit): filesystem aliases (symlinks/reparse points) are excluded from duplicate groups and never count as surviving copies; deletion authorization is revalidated per file after confirmation, so a changed/replaced file or a vanished survivor is never deleted.

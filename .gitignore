@@ -2,7 +2,8 @@
 build/
 dist/
 *.exe
-*.spec
+# NOTE (W2-004): the PyInstaller recipe is tracked so releases are reproducible from a known commit.
+# *.spec is intentionally NOT ignored.
 
 # Python
 __pycache__/
@@ -12,3 +13,8 @@ __pycache__/
 
 # Logs
 deleted_log.txt
+
+# SAIPEN local runtime state (per-machine, never project content)
+.saipen/recovery/
+.saipen/locks/
+.saipen/cache/
