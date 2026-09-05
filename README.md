@@ -1,6 +1,6 @@
 # SMART VAC DUPLICATE REMOVER
 
-**v0.0.1**
+**v0.0.2**
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-0.0.1-green.svg)

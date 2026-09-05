@@ -1,0 +1,122 @@
+{
+  "requirements": {
+    "SRC-001:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "delete_duplicates_gui.py scan(): os.lstat + S_ISREG alias gate; verify_record() returns alias refusal; symlink excluded before hashing",
+      "text": "CORE-001 P0: symlink/reparse aliases must never count as surviving verified copies; scan must exclude non-regular file entries (lstat/islink/reparse check incl. Windows), skip them with precise reason, and plan_deletion must operate only on valid retained-content records; regressions: real+symlink forms no plan authorizing target deletion, symlink-selected deletion must not remove target, two-file control still deletable",
+      "verification": "tests test_core001_symlink_not_surviving_copy, test_core001_verify_record_rejects_symlink PASS",
+      "work": "T-43"
+    },
+    "SRC-001:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "delete_selected(): plan is preview only; per-record verify_record + survivor recheck immediately before send_to_trash; stale/last_copy_refused classified as skipped, never deleted",
+      "text": "CORE-002 P0: destructive authorization is not the pre-confirmation plan; after user confirmation and immediately before each send_to_trash the selected candidate must be reverified and a currently valid retained survivor must be verified; post-plan mismatches classify as stale/changed (skipped, untouched), never deleted nor reported as ordinary success; regressions: mutate selected inside confirmation (0 deletions), remove sole survivor (no deletion), 3-copy group partial survivor change proceeds only for still-safe files",
+      "verification": "tests test_core002_stale_after_confirmation_not_deleted, test_core002_vanished_survivor_refuses_deletion PASS",
+      "work": "T-43"
+    },
+    "SRC-001:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "worker events (status/error/add_result/terminal) all generation-scoped; process_queue terminal dominates coalesced status via terminal_seen",
+      "text": "CORE-003 P1: all worker-originated queue events (status/error/add_result/terminal) carry scan_id; consumer rejects any worker event whose scan_id differs from current_scan_id; terminal event dominates coalesced nonterminal status in the same batch; separate channel for non-scan UI errors; regressions: status-then-terminal leaves terminal text, old-generation status/error ignored, current status updates pre-terminal, completed_with_errors/failed/cancelled cannot be overwritten",
+      "verification": "tests test_core003_status_then_terminal_terminal_wins, test_core003_stale_generation_events_ignored, test_core003_current_generation_status_applies PASS",
+      "work": "T-43"
+    },
+    "SRC-001:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "_normalize_originals() re-elects one original per surviving group via shared order_members(); row label refreshed, checkboxes untouched",
+      "text": "CORE-004 P2: after destructive batch, every surviving group is normalized to keep exactly one original marker using the same deterministic survivor ordering as scan, relabelled in the Treeview while preserving user checkbox states, empty groups removed; regressions: delete original from 3-member group, delete original+other, delete only non-originals",
+      "verification": "tests test_core004_group_keeps_one_original_after_original_removed, test_core004_only_nonoriginals_deleted_keeps_original PASS",
+      "work": "T-43"
+    },
+    "SRC-001:R0005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "buffered publication with per-group cancel check; UI progress_cb cancels mid-members; cancelled scan ships no groups; _on_terminal purges partial rows",
+      "text": "W2-001 P1: cancellation honored through group construction and result publication; cancel_event checked before each group iteration and during member publication; blocking queue.put must not force publishing all remaining results after cancellation; cancelled terminal must not leave armed partial rows (purge current-generation rows or buffer-until-complete); state stays cancelled",
+      "verification": "test test_w2001_cancel_during_publication_is_cancelled PASS",
+      "work": "T-43"
+    },
+    "SRC-001:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "_scan_worker try/except Exception emits one gen-scoped error + exactly one failed terminal; BaseException not caught; single terminal on happy path",
+      "text": "W2-002 P1: _scan_worker wraps engine.scan/session publication in try/except Exception (not BaseException); on exception emits one generation-scoped error + exactly one generation-scoped terminal failed event; single-shot terminal; stale-generation worker exception ignored by newer scan; regressions: fake engine RuntimeError -> failed terminal, no KeyError on missing session, successful/cancelled still exactly one terminal",
+      "verification": "tests test_w2002_worker_exception_emits_failed_terminal, test_w2002_successful_worker_single_terminal PASS",
+      "work": "T-43"
+    },
+    "SRC-001:R0007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "process_queue increments count immediately after get_nowait before any branch; stale discards consume BATCH",
+      "text": "W2-003 P2: every dequeued message consumes the per-tick BATCH budget immediately after get_nowait, before any branch can continue; stale-generation discard semantics preserved; regression: 2500 stale events drained over multiple ticks (~1700 remain after one 800-tick), mixed stale/current still apply current events, backlog eventually drains without stale rows or transitions",
+      "verification": "test test_w2003_stale_events_consume_batch_budget asserts 1700 of 2500 remain after one 800-tick PASS",
+      "work": "T-43"
+    },
+    "SRC-001:R0008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "find_empty_dirs collect_errors channel via os.walk onerror; delete_empty_folders warns incomplete, reports inaccessible count, never clean all-clear with errors",
+      "text": "W2-004 P2: find_empty_dirs exposes an explicit traversal-error channel (structured result or onerror callback); inaccessible subtrees reported distinctly from rmdir failures; successful cleanup of accessible empties preserved; UI never shows unconditional empty-result success when traversal errors occurred - reports incomplete with inaccessible count; regressions: mocked permission-denied scandir surfaced, no false all-clear, partial cleanup reports both counts, fully accessible tree keeps W2-001 idempotent behavior",
+      "verification": "test test_w2004_onerror_channel_platform_independent PASS (Windows); Linux chmod-000 variant test_w2004_traversal_error_surfaced PASS on POSIX",
+      "work": "T-43"
+    },
+    "SRC-001:R0009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "plan_deletion groups_by_id index (no linear next() scan); _batch_disarm rebuilds current_records once, one membership pass per group; failed deletes stay armed",
+      "text": "PERF-001 P1: plan_deletion uses an O(1) groups_by_id index instead of next() scan; _disarm replacement is batch rebuild (no per-record list.remove); group membership updated in one pass or via group index; failed deletions stay present; original-marker normalization (R0004) reuses the same index; regressions: 1k/2k/4k synthetic planning near-linear growth, 10k bulk-disarm equivalence vs repeated logical deletions, failed records remain present, normalization correct",
+      "verification": "tests test_perf001_group_lookup_is_indexed, test_perf001_bulk_disarm_equivalent (5000 groups) PASS",
+      "work": "T-43"
+    },
+    "SRC-001:R0010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "plan_deletion survivor loop breaks at first verified member; deterministic order preserved; all survivors checked only when none valid",
+      "text": "PERF-002 P1: survivor verification early-exits after the first currently valid unselected member; full scan only when no valid survivor found (then refuse); deterministic survivor order; selected revalidation stays full-content (CORE-002); no caching across confirmation/destructive boundary; regressions: 1 selected + 999 valid survivors = 2 verify calls, 5 invalid then 1 valid = selected+6 calls, all-invalid still checks all and refuses, outputs logically equivalent",
+      "verification": "tests test_perf002_survivor_early_exit (999 survivors -> 2 calls), test_perf002_all_invalid_survivors_checked_and_refused (5 invalid -> 6 calls, refused) PASS",
+      "work": "T-43"
+    },
+    "SRC-001:R0011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "staged pipeline size->sample(first/mid/last blocks)->full SHA-256 only on sample collisions; hash_file cancel_event raises CancelledHash between chunks, distinct from OSError",
+      "text": "PERF-003 P1: staged fingerprint pipeline - group by size, cheap deterministic sample fingerprint (e.g. first/middle/last fixed blocks) for size collisions, full SHA-256 only for sample-collision survivors; hash_file accepts optional cancel_event and checks between chunks with distinct cancellation outcome; sample equality never proves duplicate; regressions: same-size different-sample zero full hashes and zero groups, sample-match but content-different NOT grouped, true duplicates still grouped, cancel during large hash terminates within bounded chunks",
+      "verification": "tests test_perf003_same_size_different_sample_zero_full_hashes, test_perf003_sample_match_but_content_differs_not_grouped, test_perf003_true_duplicates_still_grouped, test_perf003_cancel_during_large_hash_is_bounded PASS",
+      "work": "T-43"
+    },
+    "SRC-001:R0012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "size_map stores first path per size, list only on collision; path_size whole-tree reverse map removed; size carried through candidate stage, no second stat",
+      "text": "PERF-004 P2: scan drops the whole-tree path_size reverse map and per-unique-size list allocation; store first path per size, promote to list only on collision; no extra per-member os.stat; unique-size files never hashed; deterministic final ordering preserved; regressions: 200k unique-size entries materially below ~54 MiB baseline, test_perf001_unique_size_not_hashed stays PASS, mixed fixture yields identical groups/stats",
+      "verification": "tests test_perf004_no_reverse_path_index, test_perf004_unique_size_never_hashed_still_true, test_perf004_mixed_fixture_groups_identical PASS",
+      "work": "T-43"
+    },
+    "SRC-001:R0013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "python -m unittest test_delete_duplicates: 59 tests, 58 PASS + 1 platform-skip (POSIX chmod twin has Windows-passing onerror-channel variant); validate --gate core conformant 72 pre-existing WARN; py_compile OK",
+      "text": "Canonical suite python -m unittest test_delete_duplicates plus all new core/wave2/perf regressions PASS; CORE-001/002 survivor+stale semantics intact under all optimizations; every actionable clause R0001..R0012 terminal with evidence before source close; audit/1.md consumed via journaled audit_inbox.consume only after closure passes",
+      "verification": "independent REVIEW re-run fresh from disk: 59/59 ran, OK, no failures. conf: high",
+      "work": "T-43"
+    }
+  },
+  "schema_version": 1
+}

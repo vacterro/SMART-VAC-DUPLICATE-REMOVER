@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-001:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 P0: symlink/reparse aliases must never count as surviving verified copies; scan must exclude non-regular file entries (lstat/islink/reparse check incl. Windows), skip them with precise reason, and plan_deletion must operate only on valid retained-content records; regressions: real+symlink forms no plan authorizing target deletion, symlink-selected deletion must not remove target, two-file control still deletable"
+    },
+    "SRC-001:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002 P0: destructive authorization is not the pre-confirmation plan; after user confirmation and immediately before each send_to_trash the selected candidate must be reverified and a currently valid retained survivor must be verified; post-plan mismatches classify as stale/changed (skipped, untouched), never deleted nor reported as ordinary success; regressions: mutate selected inside confirmation (0 deletions), remove sole survivor (no deletion), 3-copy group partial survivor change proceeds only for still-safe files"
+    },
+    "SRC-001:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003 P1: all worker-originated queue events (status/error/add_result/terminal) carry scan_id; consumer rejects any worker event whose scan_id differs from current_scan_id; terminal event dominates coalesced nonterminal status in the same batch; separate channel for non-scan UI errors; regressions: status-then-terminal leaves terminal text, old-generation status/error ignored, current status updates pre-terminal, completed_with_errors/failed/cancelled cannot be overwritten"
+    },
+    "SRC-001:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-004 P2: after destructive batch, every surviving group is normalized to keep exactly one original marker using the same deterministic survivor ordering as scan, relabelled in the Treeview while preserving user checkbox states, empty groups removed; regressions: delete original from 3-member group, delete original+other, delete only non-originals"
+    },
+    "SRC-001:R0005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001 P1: cancellation honored through group construction and result publication; cancel_event checked before each group iteration and during member publication; blocking queue.put must not force publishing all remaining results after cancellation; cancelled terminal must not leave armed partial rows (purge current-generation rows or buffer-until-complete); state stays cancelled"
+    },
+    "SRC-001:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-002 P1: _scan_worker wraps engine.scan/session publication in try/except Exception (not BaseException); on exception emits one generation-scoped error + exactly one generation-scoped terminal failed event; single-shot terminal; stale-generation worker exception ignored by newer scan; regressions: fake engine RuntimeError -> failed terminal, no KeyError on missing session, successful/cancelled still exactly one terminal"
+    },
+    "SRC-001:R0007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-003 P2: every dequeued message consumes the per-tick BATCH budget immediately after get_nowait, before any branch can continue; stale-generation discard semantics preserved; regression: 2500 stale events drained over multiple ticks (~1700 remain after one 800-tick), mixed stale/current still apply current events, backlog eventually drains without stale rows or transitions"
+    },
+    "SRC-001:R0008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-004 P2: find_empty_dirs exposes an explicit traversal-error channel (structured result or onerror callback); inaccessible subtrees reported distinctly from rmdir failures; successful cleanup of accessible empties preserved; UI never shows unconditional empty-result success when traversal errors occurred - reports incomplete with inaccessible count; regressions: mocked permission-denied scandir surfaced, no false all-clear, partial cleanup reports both counts, fully accessible tree keeps W2-001 idempotent behavior"
+    },
+    "SRC-001:R0009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-001 P1: plan_deletion uses an O(1) groups_by_id index instead of next() scan; _disarm replacement is batch rebuild (no per-record list.remove); group membership updated in one pass or via group index; failed deletions stay present; original-marker normalization (R0004) reuses the same index; regressions: 1k/2k/4k synthetic planning near-linear growth, 10k bulk-disarm equivalence vs repeated logical deletions, failed records remain present, normalization correct"
+    },
+    "SRC-001:R0010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-002 P1: survivor verification early-exits after the first currently valid unselected member; full scan only when no valid survivor found (then refuse); deterministic survivor order; selected revalidation stays full-content (CORE-002); no caching across confirmation/destructive boundary; regressions: 1 selected + 999 valid survivors = 2 verify calls, 5 invalid then 1 valid = selected+6 calls, all-invalid still checks all and refuses, outputs logically equivalent"
+    },
+    "SRC-001:R0011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-003 P1: staged fingerprint pipeline - group by size, cheap deterministic sample fingerprint (e.g. first/middle/last fixed blocks) for size collisions, full SHA-256 only for sample-collision survivors; hash_file accepts optional cancel_event and checks between chunks with distinct cancellation outcome; sample equality never proves duplicate; regressions: same-size different-sample zero full hashes and zero groups, sample-match but content-different NOT grouped, true duplicates still grouped, cancel during large hash terminates within bounded chunks"
+    }
+  },
+  "derived_at": "2026-09-05T21:44:35Z",
+  "derived_from": "SRC-001",
+  "interpretation_revision": 11,
+  "schema_version": 1,
+  "source_sha256": "6413b9d5763d06f6ee9d65a070115651cdd91e992179c9409a8dce080bb56827"
+}

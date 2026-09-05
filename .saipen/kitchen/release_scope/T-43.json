@@ -1,0 +1,22 @@
+{
+  "op_id": "scope-b6096c5689824edd90a9bee9b1e2b311",
+  "paths": {
+    "CHANGELOG.md": "e7179ac9e22c2e37",
+    "README.ded.md": "0686a0305480cb24",
+    "README.ee.md": "21400687c1ad2fb3",
+    "README.ja.md": "c73125a38808217d",
+    "README.md": "2bc98842683bda29",
+    "README.ru.md": "75e09c6ee64ff08f",
+    "README.uk.md": "3df5f41dc38a8fea",
+    "VERSION": "a5dd346546a38436",
+    "delete_duplicates_gui.py": "ebf99737c5b07b19",
+    "test_delete_duplicates.py": "2928fcda4693a651"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_smart_vac_duplicate_remover",
+  "project_lineage": "lineage-fe35d30149cf4a9aaa92211803371332",
+  "recorded_at": "2026-09-05T22:29:26Z",
+  "schema_version": 1,
+  "source_head": "5a580dac83f021e1eb7e5612e936ab821d9ebe0c",
+  "source_tree_fingerprint": "git-delta-v1:b3b02dbd5e8ac00fef9b1685a78a60b329d4778878c2eaff12fc9ab445da5331",
+  "ticket": "T-43"
+}

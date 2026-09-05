@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-001:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 P0: symlink/reparse aliases must never count as surviving verified copies; scan must exclude non-regular file entries (lstat/islink/reparse check incl. Windows), skip them with precise reason, and plan_deletion must operate only on valid retained-content records; regressions: real+symlink forms no plan authorizing target deletion, symlink-selected deletion must not remove target, two-file control still deletable"
+    },
+    "SRC-001:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002 P0: destructive authorization is not the pre-confirmation plan; after user confirmation and immediately before each send_to_trash the selected candidate must be reverified and a currently valid retained survivor must be verified; post-plan mismatches classify as stale/changed (skipped, untouched), never deleted nor reported as ordinary success; regressions: mutate selected inside confirmation (0 deletions), remove sole survivor (no deletion), 3-copy group partial survivor change proceeds only for still-safe files"
+    },
+    "SRC-001:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003 P1: all worker-originated queue events (status/error/add_result/terminal) carry scan_id; consumer rejects any worker event whose scan_id differs from current_scan_id; terminal event dominates coalesced nonterminal status in the same batch; separate channel for non-scan UI errors; regressions: status-then-terminal leaves terminal text, old-generation status/error ignored, current status updates pre-terminal, completed_with_errors/failed/cancelled cannot be overwritten"
+    }
+  },
+  "derived_at": "2026-09-05T21:43:04Z",
+  "derived_from": "SRC-001",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "6413b9d5763d06f6ee9d65a070115651cdd91e992179c9409a8dce080bb56827"
+}
