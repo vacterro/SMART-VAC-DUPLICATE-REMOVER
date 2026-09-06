@@ -38,7 +38,7 @@ try:
 except ImportError:  # headless environments (e.g. test runners) may lack Tk
     tk = filedialog = messagebox = ttk = None
 
-VERSION = "0.0.3"
+VERSION = "0.0.4"
 
 LOG_FILE = "deleted_log.txt"
 
@@ -895,8 +895,11 @@ class DuplicateFinderApp:
                 continue
             survivor_ok = False
             for m in group.members:
-                # Members being deleted in this very batch can never be survivors.
-                if m is rec or m.path in approved_paths or m.path in deleted_paths:
+                # Members ALREADY deleted in this batch can never be survivors;
+                # members whose deletion FAILED or went stale still exist on
+                # disk and remain valid keepers (T-45: the exclusion is the
+                # actual-deletion set, never the planned one).
+                if m is rec or m.path in deleted_paths:
                     continue
                 m_ok, _ = self.engine.verify_record(m)
                 if m_ok:

@@ -439,6 +439,67 @@ class DestructiveUITest(unittest.TestCase):
         self.assertIn("не удалось: 1", status)
         self.assertIn(dup.path, app.check_vars, "failed delete must not disarm the row")
 
+    def test_t045_failed_member_still_counts_as_survivor(self):
+        """T-45: a member whose trash failed stays on disk and must remain a
+        valid keeper for later members in the same batch. With the original
+        stale (post-plan change), dups[0]-on-disk is dups[1]'s ONLY survivor:
+        pre-fix code excluded it by the PLANNED set and refused the deletion
+        for the wrong reason; post-fix the group keeps exactly one copy."""
+        for name in ("a.bin", "b.bin", "c.bin"):
+            _make_file(os.path.join(self.tmp, name), b"DUP")
+        res = DuplicateEngine().scan(self.tmp)
+        self.assertEqual(len(res.groups), 1)
+        group = res.groups[0]
+        original = next(m for m in group.members if m.is_original)
+        dups = [m for m in group.members if not m.is_original]
+
+        calls = {"n": 0}
+
+        def selective_trash(path):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                _make_file(original.path, b"CHANGED")  # survivor goes stale post-plan
+                raise OSError("locked")
+            os.remove(path)
+
+        mod.send_to_trash = selective_trash
+        app = self._app(res.groups, dups)
+        DuplicateFinderApp.delete_selected(app)
+        # Survivor invariant: at least one member still exists on disk and the
+        # failed member is one of them. The changed original also stays (it was
+        # never a deletion target), so expect original + dups[0] alive.
+        self.assertTrue(os.path.exists(dups[0].path), "failed member must stay on disk")
+        self.assertTrue(os.path.exists(original.path), "the never-targeted original must survive")
+        self.assertFalse(os.path.exists(dups[1].path),
+                         "later member deletes against the failed-but-present member")
+        status = app.status_var.get()
+        self.assertIn("Удалено файлов: 1", status)
+        self.assertIn("не удалось: 1", status)
+
+    def test_t045_failed_member_survivor_green_control(self):
+        """T-45 green control: with the original still valid, a failed member
+        does not block the other duplicate's legitimate deletion."""
+        for name in ("a.bin", "b.bin", "c.bin"):
+            _make_file(os.path.join(self.tmp, name), b"DUP")
+        res = DuplicateEngine().scan(self.tmp)
+        group = res.groups[0]
+        dups = [m for m in group.members if not m.is_original]
+
+        calls = {"n": 0}
+
+        def selective_trash(path):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise OSError("locked")
+            os.remove(path)
+
+        mod.send_to_trash = selective_trash
+        app = self._app(res.groups, dups)
+        DuplicateFinderApp.delete_selected(app)
+        self.assertTrue(os.path.exists(dups[0].path))
+        self.assertFalse(os.path.exists(dups[1].path), "second member deletes fine against the healthy original")
+        self.assertIn("Удалено файлов: 1", app.status_var.get())
+
     def test_t027_confirm_claims_permanent_off_windows(self):
         groups, _original, dup = self._dup_pair()
         mod.deletion_is_recoverable = lambda: False

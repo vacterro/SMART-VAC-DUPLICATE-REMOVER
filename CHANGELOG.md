@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.4
+
+- Fix: batch deletion now excludes only the actually deleted members (not the whole planned set) from the survivor check, so a member whose move-to-trash failed still counts as the surviving copy for later members of the same batch.
+- Tests: 61 headless tests (59 canonical plus the T-45 failed-then-survivor regression pair with pre-fix FAIL / post-fix PASS red control).
+
 ## 0.0.3
 
 - Build: the PyInstaller recipe (`delete_duplicates_gui.spec`) is now tracked, so a fresh clone can reproduce the release build the documentation promises.
