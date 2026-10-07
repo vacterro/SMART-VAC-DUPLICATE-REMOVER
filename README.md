@@ -1,79 +1,89 @@
-# SMART VAC DUPLICATE REMOVER
+<div align="center">
 
-**v0.0.4**
+# SMART VAC Duplicate Remover
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-0.0.1-green.svg)
+**Find true duplicate files by content, review them, and remove extras without sacrificing the last verified copy.**
 
-A robust Windows tool to find and delete duplicate files — deletions go to the Recycle Bin (recoverable) — with a clean UI, SHA-256 hash checking, and detailed logging.
+[![Version](https://img.shields.io/badge/version-0.0.4-D4B86A?style=flat-square)](VERSION)
+![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square)
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
-[🤍 Support Developer](https://buymeacoffee.com/vacuum34)
+[Changelog](CHANGELOG.md) · [Issues](https://github.com/vacterro/SMART-VAC-DUPLICATE-REMOVER/issues)
 
-## Version
-0.0.1
+</div>
 
-## Features
-- **SHA-256 Hashing**: Identifies identical files accurately, regardless of name.
-- **Recycle-Bin Deletion**: Deletions are sent to the Windows Recycle Bin and can be restored. On non-Windows systems there is no Recycle Bin, and the confirmation dialog says so before deleting permanently.
-- **Empty Folder Cleanup**: Easily prune leftover empty directories (the selected root is never removed).
-- **Detailed Logging**: Records every deletion to `deleted_log.txt` for peace of mind.
-- **Safe by default**: At least one verified copy of every duplicate group is always kept; files changed since scanning are never deleted.
+## Why this tool
 
-## Installation
-1. Clone this repository
-2. Run `python delete_duplicates_gui.py` with Python 3.10+
-3. Launch the GUI and pick a folder to scan
+Filename-based duplicate cleaners are quick and wrong in exactly the situations where deletion matters. SMART VAC Duplicate Remover groups candidates and verifies file content with **SHA-256** before anything is offered for removal.
 
-No executable is committed to the repository. Build one yourself with the
-PyInstaller recipe below, or download it from a tagged GitHub release when one
-is published.
+On Windows, deletions go to the **Recycle Bin**, so ordinary mistakes remain recoverable.
 
-## Usage
-- Select a target directory
-- Click **Find Duplicates** to scan recursively (SHA-256)
-- Click **Stop Scan** to cancel a long scan
-- Review detected duplicates in the result tree
-- Optionally toggle deletion logging
-- Delete selected duplicates (sent to the Recycle Bin, recoverable)
-- Use **Delete Empty Folders** to prune empty directories
+## Safety model
 
-## Build from source (W2-004)
-The Windows executable is produced with PyInstaller from `delete_duplicates_gui.spec`:
+- at least one verified copy from every duplicate group is always kept;
+- files changed since the scan are refused at deletion time;
+- the selected root itself is never removed during empty-folder cleanup;
+- deletion is reviewed in the result tree before execution;
+- optional logging records removed paths in `deleted_log.txt`;
+- Windows uses Recycle Bin deletion instead of immediate permanent removal.
 
+## Quick start
+
+```powershell
+python delete_duplicates_gui.py
 ```
+
+Requirements: **Windows** and **Python 3.10+**.
+
+No executable is committed to the repository. A tagged release may provide one; otherwise build it locally from the supplied PyInstaller spec.
+
+## Workflow
+
+1. Choose the directory to scan.
+2. Click **Find Duplicates**.
+3. Review duplicate groups in the result tree.
+4. Stop a long scan at any time with **Stop Scan**.
+5. Select the copies you want removed.
+6. Delete them to the Recycle Bin.
+7. Optionally run **Delete Empty Folders** afterward.
+
+## Build
+
+```powershell
 pyinstaller delete_duplicates_gui.spec
 ```
 
-Releases should be built from a clean, tagged commit. Record the application `VERSION`, the source commit SHA, the PyInstaller/tool versions, and the produced executable SHA-256 in release metadata so the binary can be reproduced and verified.
+For reproducible releases, record the application [VERSION](VERSION), source commit, PyInstaller/tool versions, and resulting executable SHA-256.
 
-## Requirements
-- Windows
-- Python 3.10+ (the app runs from source; there is no committed binary)
+## Repository
+
+| Path | Purpose |
+|---|---|
+| `delete_duplicates_gui.py` | GUI and duplicate-detection engine |
+| `delete_duplicates_gui.spec` | PyInstaller build recipe |
+| `test_delete_duplicates.py` | automated test suite |
+| `VERSION` | canonical application version |
+| `CHANGELOG.md` | release history |
+
+## Languages
+
+[English](README.md) · [Русский](README.ru.md) · [Eesti](README.ee.md) · [Українська](README.uk.md) · [日本語](README.ja.md) · [Дед](README.ded.md)
 
 ## License
-MIT License
 
-## Support
-For issues and feature requests, please use the GitHub repository.
+[MIT](LICENSE)
 
-<!-- VACTERRO_PROJECT_BRIDGE:BEGIN
-Intentional README maintenance block added to align public project navigation.
-Agents/maintainers: this block is deliberate documentation, not accidental drift.
-Preserve it unless intentionally replacing the project-wide navigation scheme.
--->
----
 
 ## Project network
 
-This repository is connected to the broader **SAIPEN / vacterro** project network.
+Part of the broader **SAIPEN / vacterro** project ecosystem.
 
 [**Author hub**](https://github.com/vacterro) · [**SAIPEN HQ**](https://github.com/saipenhq) · [**SAIPEN Core**](https://github.com/vacterro/saipen) · [**ZAICODE**](https://github.com/vacterro/zaicode) · [**FastPrompter**](https://github.com/vacterro/FastPrompter) · [**SAIPEN Community**](https://discord.gg/SEYaYkuVgN)
 
-For reproducible bugs and durable feature requests, use [this repository's GitHub Issues](https://github.com/vacterro/SMART-VAC-DUPLICATE-REMOVER/issues). Use Discord for quick discussion, screenshots, and cross-project feedback.
-
-<!-- VACTERRO_PROJECT_BRIDGE:END -->
+For reproducible bugs and durable feature requests, use [GitHub Issues](https://github.com/vacterro/SMART-VAC-DUPLICATE-REMOVER/issues).
 
 <!-- VACTERRO_SUPPORT:BEGIN -->
 ---
-<sub>If this project is useful to you, optional support: [Buy Me a Coffee](https://buymeacoffee.com/vacuum34) · [Boosty](https://boosty.to/vacuum34/donate) · [PayPal](https://paypal.me/AlexNelin) · [other ways](https://github.com/vacterro/vacterro/blob/main/SUPPORT.md)</sub>
+<sub>If SMART VAC Duplicate Remover is useful to you, optional support: [Buy Me a Coffee](https://buymeacoffee.com/vacuum34) · [Boosty](https://boosty.to/vacuum34/donate) · [PayPal](https://paypal.me/AlexNelin) · [other ways](https://github.com/vacterro/vacterro/blob/main/SUPPORT.md)</sub>
 <!-- VACTERRO_SUPPORT:END -->
