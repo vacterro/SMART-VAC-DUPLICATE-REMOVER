@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "kind": "saipen-suite-record",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "test_delete_duplicates",
+    "-v"
+  ],
+  "command_sha256": "83e85140d8144fad8cfb67973de7d8966487604685796f3b54f90ed608fbd7bf",
+  "status": "PASS",
+  "exit_code": 0,
+  "totals": {
+    "runner": "unittest",
+    "ran": 118,
+    "passed": 116,
+    "red": 0,
+    "skipped": 2,
+    "counts": {
+      "skipped": 2
+    }
+  },
+  "duration_s": 43.5,
+  "timeout_s": 3600,
+  "subject_before": "git:fa5a6e9e3d8536ca1fbdb1712392055ed2c781f1e3615f9bb9ee02e5a020ef7f",
+  "subject": "git:fa5a6e9e3d8536ca1fbdb1712392055ed2c781f1e3615f9bb9ee02e5a020ef7f",
+  "stdout_tail": "",
+  "stderr_tail": "iding partial samples -> full SHA-256 runs, ... ok\ntest_t057_all_discovered_readmes_clean_utf8_no_mojibake (test_delete_duplicates.T057ReleaseSurfaceParityTest.test_t057_all_discovered_readmes_clean_utf8_no_mojibake)\nT-57: all discovered README*.md files decode as clean UTF-8 with zero mojibake sequences. ... ok\ntest_t057_all_discovered_readmes_version_parity_no_stale_literals (test_delete_duplicates.T057ReleaseSurfaceParityTest.test_t057_all_discovered_readmes_version_parity_no_stale_literals)\nT-57: every discovered README*.md resolves to root VERSION with no contradictory stale versions. ... ok\ntest_t057_contributing_lists_all_discovered_readmes (test_delete_duplicates.T057ReleaseSurfaceParityTest.test_t057_contributing_lists_all_discovered_readmes)\nT-57: CONTRIBUTING.md version-surface list includes all discovered README*.md files. ... ok\ntest_t057_no_discovered_readme_claims_committed_executable_or_nonexistent_scan_controls (test_delete_duplicates.T057ReleaseSurfaceParityTest.test_t057_no_discovered_readme_claims_committed_executable_or_nonexistent_scan_controls)\nT-57: no README advertises a committed exe or describes nonexistent scan controls. ... ok\ntest_t057_root_version_matches_module_version (test_delete_duplicates.T057ReleaseSurfaceParityTest.test_t057_root_version_matches_module_version)\nT-57: root VERSION file matches delete_duplicates_gui module VERSION. ... ok\ntest_t060_engine_core_unit_family_not_declared_in_project (test_delete_duplicates.T060CoreUnitTest.test_t060_engine_core_unit_family_not_declared_in_project)\nT-60: project must not vendor or declare the SAIPEN engine's tools/ family, ... ok\ntest_t060_ship_gate_passes_without_declared_engine_family (test_delete_duplicates.T060CoreUnitTest.test_t060_ship_gate_passes_without_declared_engine_family)\nT-60: ship_gate returns None (PASS) when engine's core-unit family is not declared. ... ok\n\n----------------------------------------------------------------------\nRan 118 tests in 43.186s\n\nOK (skipped=2)\n",
+  "tree_changed_during_run": false,
+  "finished_utc": "2026-10-15T02:12:54Z",
+  "verdict": "PASS",
+  "problems": []
+}

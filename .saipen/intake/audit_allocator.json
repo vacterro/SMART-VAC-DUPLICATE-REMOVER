@@ -1,0 +1,15 @@
+{
+  "next_id": 3,
+  "operations": {
+    "audapack 1694e56f-be2f-558f-94ac-d02aba248de0": {
+      "created_at": "2026-09-09T14:28:39Z",
+      "layer": 2,
+      "producer": "audapack",
+      "producer_item_id": "1694e56f-be2f-558f-94ac-d02aba248de0",
+      "producer_operation_id": "1694e56f-be2f-558f-94ac-d02aba248de0",
+      "sha256": "d1e8758a6b28eac321cccb344635f6f34a987c03e86ee35af9df4e2450e1bb54",
+      "state": "COMMITTED"
+    }
+  },
+  "schema_version": 1
+}

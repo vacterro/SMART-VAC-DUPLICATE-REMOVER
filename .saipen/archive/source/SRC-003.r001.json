@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-003:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "P0-A: Restore object-identity-bound destructive semantics and eliminate pathname race in send_to_trash"
+    }
+  },
+  "derived_at": "2026-10-15T20:14:23Z",
+  "derived_from": "SRC-003",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0f412a40bbbbac1c69c11bbde2f75d70099c202d082a7cb13132482c81d370fa"
+}

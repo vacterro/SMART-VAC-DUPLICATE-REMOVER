@@ -12,7 +12,20 @@
       "receipt_sha256": "6413b9d5763d06f6ee9d65a070115651cdd91e992179c9409a8dce080bb56827",
       "size_bytes": 51419,
       "state": "DELETED"
+    },
+    "audit/2.md": {
+      "binding": "exact",
+      "captured_at": "2026-09-09T16:19:30Z",
+      "closed_at": "2026-10-15T02:15:36Z",
+      "file_sha256": "d1e8758a6b28eac321cccb344635f6f34a987c03e86ee35af9df4e2450e1bb54",
+      "generation": 1,
+      "layer": 2,
+      "linked_work": "T-48",
+      "receipt_id": "SRC-002",
+      "receipt_sha256": "d1e8758a6b28eac321cccb344635f6f34a987c03e86ee35af9df4e2450e1bb54",
+      "size_bytes": 49746,
+      "state": "DELETED"
     }
   },
-  "schema_version": 1
+  "schema_version": 2
 }

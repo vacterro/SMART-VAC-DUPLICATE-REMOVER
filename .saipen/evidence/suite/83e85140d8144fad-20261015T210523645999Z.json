@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "kind": "saipen-suite-record",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "test_delete_duplicates",
+    "-v"
+  ],
+  "command_sha256": "83e85140d8144fad8cfb67973de7d8966487604685796f3b54f90ed608fbd7bf",
+  "status": "PASS",
+  "exit_code": 0,
+  "totals": {
+    "runner": "unittest",
+    "ran": 137,
+    "passed": 135,
+    "red": 0,
+    "skipped": 2,
+    "counts": {
+      "skipped": 2
+    }
+  },
+  "duration_s": 97.3,
+  "timeout_s": 3600,
+  "subject_before": "git:c53bfeedc12c92db8119331a31a4cbd4f99ef43ce192b1267025cea321101e51",
+  "subject": "git:c53bfeedc12c92db8119331a31a4cbd4f99ef43ce192b1267025cea321101e51",
+  "stdout_tail": "",
+  "stderr_tail": "all)\nP0-A deterministic reproduction: an unscanned file placed at the original ... ok\ntest_t063_get_survivor_enforces_full_fingerprint_verification (test_delete_duplicates.T063CachedKeeperContentValidityRegressionTest.test_t063_get_survivor_enforces_full_fingerprint_verification)\n_GroupDeletionState.get_survivor rejects a cached keeper when content changed. ... ok\ntest_t063_performance_scaling_1k_2k_4k_members (test_delete_duplicates.T063CachedKeeperContentValidityRegressionTest.test_t063_performance_scaling_1k_2k_4k_members)\nPerformance benchmark: monotonic scan with verified keeper scales linearly O(N) ... ok\ntest_t063_tampered_keeper_refuses_deletion_of_remaining_duplicates (test_delete_duplicates.T063CachedKeeperContentValidityRegressionTest.test_t063_tampered_keeper_refuses_deletion_of_remaining_duplicates)\nP0-B deterministic reproduction: ... ok\ntest_t064_changelog_sync_os_locks_and_test_count (test_delete_duplicates.T064PortabilityAndDocSyncTest.test_t064_changelog_sync_os_locks_and_test_count)\nCHANGELOG.md 0.0.5 accurately describes kernel byte-range lock semantics ... ok\ntest_t064_send_to_trash_portable_when_windll_missing (test_delete_duplicates.T064PortabilityAndDocSyncTest.test_t064_send_to_trash_portable_when_windll_missing)\nWhen deletion_is_recoverable is mocked True on non-Windows (no ctypes.windll), ... ok\ntest_t065_gitignore_ignores_recovery_log_and_tmp_files (test_delete_duplicates.T065QuarantineMetadataHygieneTest.test_t065_gitignore_ignores_recovery_log_and_tmp_files)\n.gitignore matches quarantine_recovery.json and transient tmp variants. ... ok\ntest_t065_record_quarantine_metadata_cleans_up_tmp_on_replace_failure (test_delete_duplicates.T065QuarantineMetadataHygieneTest.test_t065_record_quarantine_metadata_cleans_up_tmp_on_replace_failure)\nWhen os.replace fails with OSError, temporary metadata file is removed in finally block. ... ok\n\n----------------------------------------------------------------------\nRan 137 tests in 97.036s\n\nOK (skipped=2)\n",
+  "tree_changed_during_run": false,
+  "finished_utc": "2026-10-15T21:05:23Z",
+  "verdict": "PASS",
+  "problems": []
+}

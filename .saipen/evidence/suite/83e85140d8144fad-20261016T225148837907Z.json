@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "kind": "saipen-suite-record",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "test_delete_duplicates",
+    "-v"
+  ],
+  "command_sha256": "83e85140d8144fad8cfb67973de7d8966487604685796f3b54f90ed608fbd7bf",
+  "status": "PASS",
+  "exit_code": 0,
+  "totals": {
+    "runner": "unittest",
+    "ran": 147,
+    "passed": 145,
+    "red": 0,
+    "skipped": 2,
+    "counts": {
+      "skipped": 2
+    }
+  },
+  "duration_s": 97.5,
+  "timeout_s": 3600,
+  "subject_before": "git:52c0a3495d5fa1696eb1fd013f70e82daac59a4d7080225775d60e84f225eb2a",
+  "subject": "git:52c0a3495d5fa1696eb1fd013f70e82daac59a4d7080225775d60e84f225eb2a",
+  "stdout_tail": "",
+  "stderr_tail": "per_user_storage (test_delete_duplicates.T066RecoveryIntegrityRegressionTest.test_t066_journal_default_is_absolute_per_user_storage)\nThe default journal path is absolute per-user application storage, ... ok\ntest_t066_metadata_discoverable_after_cwd_change (test_delete_duplicates.T066RecoveryIntegrityRegressionTest.test_t066_metadata_discoverable_after_cwd_change)\nA recovery attempt from another working directory still finds the ... ok\ntest_t066_record_returns_false_when_journal_unwritable (test_delete_duplicates.T066RecoveryIntegrityRegressionTest.test_t066_record_returns_false_when_journal_unwritable)\nA failed receipt is reported, not swallowed: ... ok\ntest_t066_restore_refuses_missing_fingerprint_with_engine (test_delete_duplicates.T066RecoveryIntegrityRegressionTest.test_t066_restore_refuses_missing_fingerprint_with_engine)\nWith an engine provided, a metadata record without a fingerprint is ... ok\ntest_t066_restore_refuses_without_any_metadata_with_engine (test_delete_duplicates.T066RecoveryIntegrityRegressionTest.test_t066_restore_refuses_without_any_metadata_with_engine)\nNo record at all plus an engine is also a refusal. ... ok\ntest_t066_restore_verifies_fingerprint_when_present (test_delete_duplicates.T066RecoveryIntegrityRegressionTest.test_t066_restore_verifies_fingerprint_when_present)\nThe T-62 verify path stays strict: mismatch refuses, match restores. ... ok\ntest_t066_send_to_trash_refuses_without_durable_receipt (test_delete_duplicates.T066RecoveryIntegrityRegressionTest.test_t066_send_to_trash_refuses_without_durable_receipt)\nNo durable receipt, no destruction: the destructive step is refused ... ok\ntest_t066_status_transition_preserves_immutable_identity (test_delete_duplicates.T066RecoveryIntegrityRegressionTest.test_t066_status_transition_preserves_immutable_identity)\nA status transition omitting size/fingerprint keeps the recorded ... ok\n\n----------------------------------------------------------------------\nRan 147 tests in 97.307s\n\nOK (skipped=2)\n",
+  "tree_changed_during_run": false,
+  "finished_utc": "2026-10-16T22:51:48Z",
+  "verdict": "PASS",
+  "problems": []
+}

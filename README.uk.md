@@ -1,16 +1,15 @@
 # SMART VAC DUPLICATE REMOVER
 
-**v0.0.4**
+**v0.0.5**
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-0.0.1-green.svg)
+![Version](https://img.shields.io/badge/version-0.0.5-green.svg)
 
 Надійний інструмент для Windows, який знаходить і видаляє дублікати файлів — видалене потрапляє до Корзини (можна відновити) — з чистим інтерфейсом, перевіркою за SHA-256 і докладним журналом.
 
 [🤍 Підтримати розробника](https://buymeacoffee.com/vacuum34)
 
-## Версія
-0.0.1
+0.0.5
 
 ## Можливості
 - **Хешування SHA-256**: точно визначає однакові файли незалежно від імені.
@@ -56,4 +55,4 @@ MIT License
 ## Підтримка
 Для повідомлень про помилки та побажань використовуйте репозиторій GitHub.
 
-<!-- source-digest: README.md sha256:6827ef66aacfe0e095cd1c3ee67551ee470d0394908e94a5be6c1d743672ce0c -->
+<!-- source-digest: README.md sha256:b6b91a1554d643cbf88b7aa4fc807a623957660f37d49aa1d9ff53e9c0e9da45 -->

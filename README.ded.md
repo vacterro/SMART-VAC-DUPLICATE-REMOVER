@@ -1,16 +1,15 @@
 # SMART VAC DUPLICATE REMOVER
 
-**v0.0.4**
+**v0.0.5**
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-0.0.1-green.svg)
+![Version](https://img.shields.io/badge/version-0.0.5-green.svg)
 
 Windows-тулза, которая находит дубликаты файлов и выносит их в Корзину — не «удаляет навсегда», а именно в Корзину, откуда всё достаётся обратно. Сверка по SHA-256, никакой самодеятельности, всё пишется в лог.
 
 [🤍 Закинуть автору на кофе](https://buymeacoffee.com/vacuum34)
 
-## Версия
-0.0.1
+0.0.5
 
 ## Что умеет
 - **SHA-256**: сверяет содержимое, а не имена. Файл переименовали десять раз — всё равно найдёт.
@@ -55,4 +54,4 @@ MIT License
 ## Поддержка
 Нашёл баг или хочешь фичу — пиши в репозиторий на GitHub.
 
-<!-- source-digest: README.md sha256:6827ef66aacfe0e095cd1c3ee67551ee470d0394908e94a5be6c1d743672ce0c -->
+<!-- source-digest: README.md sha256:b6b91a1554d643cbf88b7aa4fc807a623957660f37d49aa1d9ff53e9c0e9da45 -->

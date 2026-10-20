@@ -1,16 +1,15 @@
 # SMART VAC DUPLICATE REMOVER
 
-**v0.0.4**
+**v0.0.5**
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-0.0.1-green.svg)
+![Version](https://img.shields.io/badge/version-0.0.5-green.svg)
 
 Windows 向けの堅実な重複ファイル検索・削除ツールです。削除したファイルはごみ箱に入るため復元でき、シンプルな画面、SHA-256 による照合、詳細なログを備えています。
 
 [🤍 開発者を支援する](https://buymeacoffee.com/vacuum34)
 
-## バージョン
-0.0.1
+0.0.5
 
 ## 機能
 - **SHA-256 ハッシュ**: ファイル名に関係なく、同一内容のファイルを正確に判別します。
@@ -55,4 +54,4 @@ MIT License
 ## サポート
 不具合の報告や機能の要望は GitHub リポジトリをご利用ください。
 
-<!-- source-digest: README.md sha256:6827ef66aacfe0e095cd1c3ee67551ee470d0394908e94a5be6c1d743672ce0c -->
+<!-- source-digest: README.md sha256:b6b91a1554d643cbf88b7aa4fc807a623957660f37d49aa1d9ff53e9c0e9da45 -->

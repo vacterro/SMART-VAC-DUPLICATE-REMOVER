@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-005:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-68 closed with verification evidence in LOG: verify -> PASS [target: T-68] conf: high -- python -m unittest test_delete_duplicates: Ran 169 tests, OK, skipped=2, exit 0 on the current tree; python -m py_compile delete_duplicates_gui.py: clean; python tools/validate.py --gate core: conformant, 0 problems; findings A-E closed (REC-001..REC-006) with no regression to T-49/T-50/T-62/T-63/T-66",
+      "text": "recoverable quarantine journal + transaction-safe acquisition/restore (findings A-E)",
+      "verification": "the Work this request created reached its own verification gate; see the T-68 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-68"
+    }
+  },
+  "schema_version": 1
+}

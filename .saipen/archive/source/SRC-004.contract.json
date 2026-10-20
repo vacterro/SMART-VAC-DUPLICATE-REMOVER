@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-004:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "recovery-integrity remediation: immutable recovery identity across states, refuse unverifiable restore, durable recovery receipt before deletion, per-user recovery log location"
+    }
+  },
+  "derived_at": "2026-10-17T10:58:43Z",
+  "derived_from": "SRC-004",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "17d6a8a8a1612a303a49023e8eeef72f6edd81ad5d77dec8c8c87d564602dabb"
+}

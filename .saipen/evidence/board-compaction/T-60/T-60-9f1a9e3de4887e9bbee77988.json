@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-452",
+    "operation_id": "ticket-16ee5cd51e874e4895448ddc8d0279c3",
+    "reason": "new BOARD record exceeds the live cap; canonical writer externalized detail"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-60/T-60-9f1a9e3de4887e9bbee77988.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 1682,
+  "original_record_path": ".saipen/recovery/board-compaction/T-60/T-60-9f1a9e3de4887e9bbee77988.BOARD.md",
+  "original_record_sha256": "9f1a9e3de4887e9bbee7798890d94b5a0e9d1f6068f4d08480dd328a86350bf0",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_smart_vac_duplicate_remover",
+  "project_lineage": "lineage-fe35d30149cf4a9aaa92211803371332",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": "",
+  "ticket_id": "T-60"
+}

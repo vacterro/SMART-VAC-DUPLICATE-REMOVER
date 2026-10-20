@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "kind": "saipen-suite-declaration",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "test_delete_duplicates",
+    "-v"
+  ],
+  "command_sha256": "83e85140d8144fad8cfb67973de7d8966487604685796f3b54f90ed608fbd7bf",
+  "timeout_s": 3600,
+  "declared_utc": "2026-10-15T00:10:31Z"
+}

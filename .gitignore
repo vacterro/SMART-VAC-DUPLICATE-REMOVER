@@ -13,8 +13,10 @@ __pycache__/
 
 # Logs
 deleted_log.txt
+quarantine_recovery.json*
 
 # SAIPEN local runtime state (per-machine, never project content)
-.saipen/recovery/
+.saipen/recovery/*
+!.saipen/recovery/board-compaction/
 .saipen/locks/
 .saipen/cache/

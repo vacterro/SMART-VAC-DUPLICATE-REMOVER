@@ -17,7 +17,7 @@ Contributions are welcome! Please follow these guidelines:
 ## Release process (SHIP-order, T-44)
 
 Version-surface files (`VERSION`, `CHANGELOG.md`, `README.md`, `README.ee.md`,
-`README.ru.md`, `README.uk.md`, `README.ja.md`, `README.ded.md`) MUST land in
+`README.et.md`, `README.ru.md`, `README.uk.md`, `README.ja.md`, `README.ded.md`) MUST land in
 `BUILD` before `VERIFY`. No edit to these files may land after `REVIEW` has
 approved `SHIP` without a new `VERIFY` + `REVIEW` pass. If a version-surface
 change is needed in `SHIP`, transition back to `BUILD` and re-run `VERIFY`

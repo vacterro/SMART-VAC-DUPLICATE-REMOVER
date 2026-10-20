@@ -1,31 +1,50 @@
 # SMART VAC DUPLICATE REMOVER
 
-UsaldusvГ¤Г¤rne Windowsi tГ¶Г¶riist failide dubleerimiste turvaliseks leidmiseks ja kustutamiseks: puhas liides, SHA-256 rГ¤si kontroll ja Гјksikasjalik logimine.
+**v0.0.5**
 
-[рџ¤Ќ Toeta arendajat](https://buymeacoffee.com/vacuum34)
+Usaldusväärne Windowsi tööriist failide dubleerimiste turvaliseks leidmiseks ja kustutamiseks: puhas liides, SHA-256 räsi kontroll ja üksikasjalik logimine.
 
-## Versioon
-0.0.1
+[🤍 Toeta arendajat](https://buymeacoffee.com/vacuum34)
+
+0.0.5
 
 ## Funktsioonid
-- **SHA-256 rГ¤sistamine**: tuvastab identsed failid tГ¤pselt, sГµltumata nimetusest.
-- **TГјhjade kaustade puhastus**: eemalda hГµlpsalt allesjГ¤Г¤nud tГјhjad kataloogid.
-- **Гњksikasjalik logimine**: kГµik kirjutatakse `deleted_log.txt` faili.
+- **SHA-256 räsimine**: tuvastab identsed failid täpselt, sõltumata nimetusest.
+- **Kustutamine prügikasti**: kustutatud failid lähevad Windowsi prügikasti ja on taastatavad. Mujal prügikasti pole ja kinnitusaken ütleb enne lõplikku kustutamist otse välja.
+- **Tühjade kaustade puhastus**: eemalda hõlpsalt allesjäänud tühjad kataloogid (valitud juurkausta ei eemaldata).
+- **Üksikasjalik logimine**: kõik kirjutatakse `deleted_log.txt` faili.
+- **Vaikimisi turvaline**: iga dubleerimisgrupi vähemalt üks kontrollitud koopia säilib alati; skaneerimise järel muutunud faile ei kustutata.
 
 ## Paigaldus
-1. Klooni see hoidla vГµi laadi alla uusim vГ¤ljalase
-2. KГ¤ivita `delete_duplicates_gui.py` Python 3.10+ abil vГµi kasuta valmis `delete_duplicates_gui.exe`
+1. Klooni see hoidla
+2. Käivita `python delete_duplicates_gui.py` Python 3.10+ abil
 3. Ava GUI ja vali skaneeritav kaust
+
+Hoidlas ei ole kaasas käivitatavat faili. Ehita see ise allpool kirjeldatud
+PyInstalleri retseptiga või laadi alla märgistatud GitHubi väljalaskest, kui
+selline avaldatakse.
 
 ## Kasutamine
 - Vali sihtkaust
-- Seadista skaneerimise valikuid (alankaustad, rГ¤si algoritm)
-- Vaata leitud dubleerimisi
-- Kustuta valitud dubleerimised turvaliselt
+- Klõpsi **Leia dubleerimised**, et skaneerida rekursiivselt (SHA-256)
+- Klõpsi **Peata otsing**, et pikk skaneerimine katkestada
+- Vaata leitud dubleerimisi tulemuste puus
+- Soovi korral lülita sisse kustutamise logimine
+- Kustuta valitud dubleerimised (lähevad prügikasti, taastatavad)
+- Kasuta **Kustuta tühjad kaustad** tühjade kataloogide eemaldamiseks
 
-## NГµuded
+## Ehitus lähtekoodist (W2-004)
+Windowsi käivitatav fail luuakse PyInstalleriga spec-failist `delete_duplicates_gui.spec`:
+
+```
+pyinstaller delete_duplicates_gui.spec
+```
+
+Väljalaskeid tuleks ehitada puhtast, lipuga märgitud commitist. Väljalaske metatabelisse tuleks kirjutada rakenduse `VERSION`, lähtekoodi commit-SHA, PyInstalleri versioon ja saadud exe SHA-256, et binaarfail on reprodutseeritav ja verifitseeritav.
+
+## Nõuded
 - Windows
-- Python 3.10+ (lГ¤htekoodist kГ¤ivitamiseks) vГµi valmis exe
+- Python 3.10+ (rakendus käib lähtekoodist; hoidlas ei ole binaarfaili)
 
 ## Litsents
 MIT License

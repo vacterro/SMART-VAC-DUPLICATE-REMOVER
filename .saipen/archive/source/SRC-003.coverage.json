@@ -1,0 +1,32 @@
+{
+  "requirements": {
+    "SRC-003:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-702",
+      "text": "P0-A: Restore object-identity-bound destructive semantics and eliminate pathname race in send_to_trash",
+      "verification": "pytest test_delete_duplicates.py -k test_t062 -> PASS",
+      "work": "T-62"
+    },
+    "SRC-003:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-702",
+      "text": "P0-B: Enforce content validity of keepers, do not accept cached metadata alone",
+      "verification": "pytest test_delete_duplicates.py -k test_t063 -> PASS",
+      "work": "T-63"
+    },
+    "SRC-003:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-702",
+      "text": "P2: Test portability and documentation sync (T-61 non-Windows test, T-59 inventory, CHANGELOG.md)",
+      "verification": "pytest test_delete_duplicates.py -k test_t064 -> PASS",
+      "work": "T-64"
+    }
+  },
+  "schema_version": 1
+}

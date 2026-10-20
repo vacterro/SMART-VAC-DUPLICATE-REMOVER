@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "kind": "saipen-suite-record",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "test_delete_duplicates",
+    "-v"
+  ],
+  "command_sha256": "83e85140d8144fad8cfb67973de7d8966487604685796f3b54f90ed608fbd7bf",
+  "status": "PASS",
+  "exit_code": 0,
+  "totals": {
+    "runner": "unittest",
+    "ran": 108,
+    "passed": 106,
+    "red": 0,
+    "skipped": 2,
+    "counts": {
+      "skipped": 2
+    }
+  },
+  "duration_s": 39.3,
+  "timeout_s": 3600,
+  "subject_before": "git:2f85bd4c4627af1cba71bc9c5f422cf260f7e8a7def6c4e4f37b5e4cee9315c1",
+  "subject": "git:2f85bd4c4627af1cba71bc9c5f422cf260f7e8a7def6c4e4f37b5e4cee9315c1",
+  "stdout_tail": "",
+  "stderr_tail": "dation_mid_batch_forces_safe_fallback)\nT-54: invalidating the cached keeper mid-batch forces safe fallback scan to next valid keeper, ... ok\ntest_t054_preview_no_longer_full_hashes_selected_records (test_delete_duplicates.T054BulkDeletionScalingTest.test_t054_preview_no_longer_full_hashes_selected_records)\nT-54: preview phase eliminates full SHA-256 hashing of selected records, ... ok\ntest_t055_multiple_groups_saturated_queue_cancellation (test_delete_duplicates.T055BackpressureCancellationTest.test_t055_multiple_groups_saturated_queue_cancellation)\nT-55: repeat with multiple distinct duplicate groups across subdirectories. ... ok\ntest_t055_saturated_queue_cancel_exits_worker_without_draining (test_delete_duplicates.T055BackpressureCancellationTest.test_t055_saturated_queue_cancel_exits_worker_without_draining)\nT-55: worker blocked on full result queue unblocks on cancel and exits ... ok\ntest_t055_slow_consumer_bounded_memory_no_result_loss (test_delete_duplicates.T055BackpressureCancellationTest.test_t055_slow_consumer_bounded_memory_no_result_loss)\nT-55: non-cancelled scan with bounded queue preserves backpressure ... ok\ntest_t055_terminal_reaches_consumer_while_result_queue_full (test_delete_duplicates.T055BackpressureCancellationTest.test_t055_terminal_reaches_consumer_while_result_queue_full)\nT-55: process_queue handles control_queue first, so cancelled terminal ... ok\ntest_t060_engine_core_unit_family_not_declared_in_project (test_delete_duplicates.T060CoreUnitTest.test_t060_engine_core_unit_family_not_declared_in_project)\nT-60: project must not vendor or declare the SAIPEN engine's tools/ family, ... ok\ntest_t060_ship_gate_passes_without_declared_engine_family (test_delete_duplicates.T060CoreUnitTest.test_t060_ship_gate_passes_without_declared_engine_family)\nT-60: ship_gate returns None (PASS) when engine's core-unit family is not declared. ... ok\n\n----------------------------------------------------------------------\nRan 108 tests in 39.084s\n\nOK (skipped=2)\n",
+  "tree_changed_during_run": false,
+  "finished_utc": "2026-10-15T01:46:03Z",
+  "verdict": "PASS",
+  "problems": []
+}
