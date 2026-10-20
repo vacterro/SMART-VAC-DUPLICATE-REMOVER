@@ -4360,6 +4360,26 @@ class T068RecoveryTransactionTest(unittest.TestCase):
         rec = mod.get_quarantine_metadata(qpath)
         self.assertEqual(rec["fingerprint"], fp)
 
+    def test_t072_refused_restore_leaves_no_temp_copy_in_destination(self):
+        """T-72: a refused restore leaves the destination directory untouched.
+
+        Red control: pre-fix restore_quarantined_file created the snapshot copy
+        inside the destination directory and returned its refusals from inside
+        the try block, so the cleanup never ran and every refusal left a
+        .vacrestore_* file holding a full copy of the quarantined content.
+        """
+        src, qpath, fp = self._acquire(content=b"original-bytes")
+        with open(qpath, "wb") as f:
+            f.write(b"tampered-bytes")
+        ok, reason = mod.restore_quarantined_file(qpath, original_path=src)
+        self.assertEqual((ok, reason), (False, "fingerprint_mismatch"))
+        leftovers = [n for n in os.listdir(self.tmp) if n.startswith(".vacrestore_")]
+        self.assertEqual(
+            leftovers, [],
+            f"a refused restore must not leave a snapshot copy behind: {leftovers}")
+        self.assertTrue(os.path.exists(qpath), "the quarantined object must survive")
+        self.assertFalse(os.path.exists(src), "the original path must stay absent")
+
     def test_t068_unverified_restore_requires_explicit_policy(self):
         """Only the distinct recovery policy can restore unverifiable bytes."""
         src, qpath, fp = self._acquire()

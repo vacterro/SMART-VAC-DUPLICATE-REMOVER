@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-009:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-72 verification evidence on the current tree: E-887 validate.py -> PASS conf: high (0 FAIL, 33 WARN, ship gate green) and E-888 transition to REVIEW (suite 172 OK, 2 skipped, 18 current-tree re-verification receipts RV-000116..RV-000133)",
+      "text": "fix restore temp-file leak: a refused restore must not leave a .vacrestore_* copy in the destination directory (delete_duplicates_gui.py:766-799)",
+      "verification": "python -B -m unittest test_delete_duplicates -v -> PASS: 172 tests, 170 passed, 0 red, 2 skipped; record:.saipen/evidence/suite/83e85140d8144fad-20261020T203232069847Z.json sha256:f7ea3669f1564a66b6c6125ed6e4356059870c12bded08ec4c99906292a55a7d; the regression test test_t072_refused_restore_leaves_no_temp_copy_in_destination asserts that a refused restore (fingerprint_mismatch) leaves no .vacrestore_* file in the destination directory",
+      "work": "T-72"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-009:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "fix restore temp-file leak: a refused restore must not leave a .vacrestore_* copy in the destination directory (delete_duplicates_gui.py:766-799)"
+    }
+  },
+  "derived_at": "2026-10-20T20:55:06Z",
+  "derived_from": "SRC-009",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "c0b30c111d09d0145ee7b51eff40e4682e249abfc2c8bf818e3c305c7f1a24d1"
+}

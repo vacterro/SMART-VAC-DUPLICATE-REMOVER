@@ -49,7 +49,7 @@ try:
 except ImportError:  # headless environments (e.g. test runners) may lack Tk
     tk = filedialog = messagebox = ttk = None
 
-VERSION = "0.0.6"
+VERSION = "0.0.7"
 
 LOG_FILE = "deleted_log.txt"
 
@@ -765,6 +765,7 @@ def restore_quarantined_file(qpath, original_path=None, engine=None,
         pass
     fd, tmp_path = tempfile.mkstemp(prefix=".vacrestore_", dir=dest_dir)
     snapshot_fp = None
+    refusal = None
     try:
         hasher = hashlib.sha256()
         with os.fdopen(fd, "wb") as out:
@@ -781,22 +782,27 @@ def restore_quarantined_file(qpath, original_path=None, engine=None,
         try:
             st_after = os.stat(qpath)
         except OSError as e:
-            return False, f"hash_error: {e}"
-        identity_after = (getattr(st_after, "st_dev", None),
-                          getattr(st_after, "st_ino", None),
-                          st_after.st_size,
-                          getattr(st_after, "st_mtime_ns", int(st_after.st_mtime * 1e9)))
-        if identity_after != identity_before:
-            return False, "fingerprint_mismatch"
-        if (not allow_unverified) and expected_fp:
-            if snapshot_fp != expected_fp:
-                return False, "fingerprint_mismatch"
+            refusal = f"hash_error: {e}"
+        else:
+            identity_after = (getattr(st_after, "st_dev", None),
+                              getattr(st_after, "st_ino", None),
+                              st_after.st_size,
+                              getattr(st_after, "st_mtime_ns", int(st_after.st_mtime * 1e9)))
+            if identity_after != identity_before:
+                refusal = "fingerprint_mismatch"
+            elif (not allow_unverified) and expected_fp and snapshot_fp != expected_fp:
+                refusal = "fingerprint_mismatch"
     except OSError as e:
+        refusal = f"hash_error: {e}"
+    if refusal is not None:
+        # Every refusal removes the snapshot copy: it lives in the DESTINATION
+        # directory, so a leftover would be a full copy of the quarantined
+        # content the user never asked to keep (T-72).
         try:
             os.remove(tmp_path)
         except OSError:
             pass
-        return False, f"hash_error: {e}"
+        return False, refusal
 
     # Install the verified snapshot without overwriting an occupied destination.
     try:

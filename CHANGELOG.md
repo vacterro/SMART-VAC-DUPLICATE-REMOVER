@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.7
+
+- Fix (T-72): a refused restore no longer leaves a snapshot copy behind — `restore_quarantined_file` creates its temporary copy in the destination directory and returned its refusals (hash error, identity change, fingerprint mismatch) from inside the `try` block, so the cleanup never ran and every refusal left a hidden `.vacrestore_*` file holding a full copy of the quarantined content in the user's target folder. Every refusal path now removes the copy; the quarantined object and its receipt are untouched.
+- Tests: 172 headless tests — the new T-72 regression test drives a refused restore (tampered quarantine object) and asserts that the destination directory keeps no `.vacrestore_*` file (red against the v0.0.6 tree: the refusal left `.vacrestore_j_h9vo13` with the tampered content; green against v0.0.7).
+- Release (T-73): the release scope now publishes the discharge of the source closed by the previous release (SRC-008: archive, tombstone and the removal of its active intake files), so the published tree agrees with the release outcome instead of listing a closed source as still open.
+
 ## 0.0.6
 
 - Fix (T-71): the published distribution now ships the board-compaction recovery payloads that `.saipen/BOARD.md` cites in its `detail_ref` entries (`.saipen/recovery/board-compaction/**`), so a fresh clone of the repository resolves every board detail reference instead of failing the T-59 detail-ref regression.
