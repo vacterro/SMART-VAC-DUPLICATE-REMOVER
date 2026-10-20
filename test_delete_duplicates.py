@@ -3235,6 +3235,23 @@ class T059BoardDetailRefArchivingTest(unittest.TestCase):
             self.assertTrue(filecmp.cmp(rec_path, evi_path, shallow=False),
                             f"evidence mirror bytes differ from recovery target: {ref}")
 
+    def test_t059_mirror_pair_is_byte_bound_in_gitattributes(self):
+        """T-59: both sides of the recovery/evidence mirror pair are byte-bound.
+
+        The mirror pair must stay byte-identical after a fresh clone, so neither
+        side may be line-ending converted by checkout (Windows autocrlf would
+        otherwise rewrite the evidence side and break the byte comparison).
+        """
+        attrs_path = os.path.join(self.proj_root, ".gitattributes")
+        with open(attrs_path, encoding="utf-8") as f:
+            attrs = f.read()
+        for pattern in (".saipen/recovery/board-compaction/**",
+                        ".saipen/evidence/board-compaction/**"):
+            self.assertIn(
+                f"{pattern} -text", attrs,
+                f"{pattern} must be declared byte-bound (-text) so a fresh clone keeps the mirror byte-identical",
+            )
+
     def test_t059_delivery_inventory_includes_all_board_detail_refs(self):
         """T-59: delivery inventory (tracked + untracked non-ignored) includes all detail_ref targets.
         Distinguishes archive validation (when .git is absent) from Git workspace validation (P2)."""

@@ -1,11 +1,11 @@
 {
   "active": {
-    "SRC-007": {
-      "linked_work": "T-70",
-      "source_sha256": "94d91db1be6607ce1d47794a851d25f5b08c57c9fefdad56904878c23f91b296"
+    "SRC-008": {
+      "linked_work": "T-71",
+      "source_sha256": "5fb513af20ce6ddc1ec7884a0e8fa4835e7100de3c8abef4a79060d1aaadb061"
     }
   },
-  "next_id": 8,
+  "next_id": 9,
   "schema_version": 1,
   "tombstones": {
     "SRC-001": {
@@ -100,6 +100,22 @@
       "requirements": 1,
       "schema_version": 1,
       "source_sha256": "10c17aca2a6d1447c0920d84122a33c7e512af8c1aef574049c76aa69691b65e",
+      "status": "CLOSED",
+      "unresolved": 0
+    },
+    "SRC-007": {
+      "actionable": 1,
+      "archive_ref": ".saipen/archive/source/SRC-007.md",
+      "closed_at": "2026-10-20T19:06:28Z",
+      "closure_event": null,
+      "linked_work": "T-70",
+      "linked_works": [
+        "T-70"
+      ],
+      "receipt_id": "SRC-007",
+      "requirements": 1,
+      "schema_version": 1,
+      "source_sha256": "94d91db1be6607ce1d47794a851d25f5b08c57c9fefdad56904878c23f91b296",
       "status": "CLOSED",
       "unresolved": 0
     }

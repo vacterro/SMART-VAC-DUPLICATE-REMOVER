@@ -1,15 +1,15 @@
 # SMART VAC DUPLICATE REMOVER
 
-**v0.0.5**
+**v0.0.6**
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-0.0.5-green.svg)
+![Version](https://img.shields.io/badge/version-0.0.6-green.svg)
 
 A robust Windows tool to find and delete duplicate files — deletions go to the Recycle Bin (recoverable) — with a clean UI, SHA-256 hash checking, and detailed logging.
 
 [🤍 Support Developer](https://buymeacoffee.com/vacuum34)
 
-0.0.5
+0.0.6
 
 ## Features
 - **SHA-256 Hashing**: Identifies identical files accurately, regardless of name.

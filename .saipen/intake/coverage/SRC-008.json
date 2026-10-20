@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-008:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-70 published the project at https://gitlab.com/vacuum34/smart_vac_duplicate_remover.git: git ls-remote --heads --tags origin shows refs/heads/master and refs/tags/v0.0.5 both at ffc0d61c60ae7945227ae51823759af1e40835cb",
+      "text": "push project to https://gitlab.com/vacuum34/smart_vac_duplicate_remover",
+      "verification": "git ls-remote --heads --tags origin -> PASS (remote master and tag v0.0.5 both at ffc0d61c60ae7945227ae51823759af1e40835cb on the GitLab remote)",
+      "work": "T-71"
+    }
+  },
+  "schema_version": 1
+}

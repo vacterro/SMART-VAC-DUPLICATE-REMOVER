@@ -49,7 +49,7 @@ try:
 except ImportError:  # headless environments (e.g. test runners) may lack Tk
     tk = filedialog = messagebox = ttk = None
 
-VERSION = "0.0.5"
+VERSION = "0.0.6"
 
 LOG_FILE = "deleted_log.txt"
 

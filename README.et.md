@@ -1,12 +1,12 @@
 # SMART VAC DUPLICATE REMOVER
 
-**v0.0.5**
+**v0.0.6**
 
 Usaldusväärne Windowsi tööriist failide dubleerimiste turvaliseks leidmiseks ja kustutamiseks: puhas liides, SHA-256 räsi kontroll ja üksikasjalik logimine.
 
 [🤍 Toeta arendajat](https://buymeacoffee.com/vacuum34)
 
-0.0.5
+0.0.6
 
 ## Funktsioonid
 - **SHA-256 räsimine**: tuvastab identsed failid täpselt, sõltumata nimetusest.

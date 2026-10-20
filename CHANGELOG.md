@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.6
+
+- Fix (T-71): the published distribution now ships the board-compaction recovery payloads that `.saipen/BOARD.md` cites in its `detail_ref` entries (`.saipen/recovery/board-compaction/**`), so a fresh clone of the repository resolves every board detail reference instead of failing the T-59 detail-ref regression.
+- Fix (T-71): the exportable mirror subtree `.saipen/evidence/board-compaction/**` is now declared byte-bound in `.gitattributes`, matching the recovery side, so a Windows checkout cannot line-ending-convert the mirror and break the byte-identical mirror comparison.
+- Tests: 171 headless tests — the T-59 detail-ref test asserts that every `detail_ref` target named by the board exists on disk (red against the v0.0.5 tree: a fresh clone failed with `detail_ref target missing: .saipen/recovery/board-compaction/T-49/T-49-a21cfc40daf5d4148bd2d632.json`; green against v0.0.6), and a new T-59 guard asserts that both sides of the recovery/evidence mirror pair stay byte-bound in `.gitattributes`, so a fresh clone cannot line-ending-convert the evidence copy and break the byte-identical mirror comparison (red against the v0.0.6 candidate tree).
+- Correction: the 0.0.5 entry below understated the suite size — the shipped v0.0.5 tag already contains 170 test methods, not 169.
+
 ## 0.0.5
 
 - Security (P0-A / T-68): a corrupt or schema-invalid recovery journal is preserved and never reset to an empty one — writes and destructive authorization refuse while journal integrity is unresolved, the damaged bytes are kept as evidence (`.corrupt-*`), and the last durable journal is retained as `.bak` for transaction recovery.
@@ -12,7 +19,7 @@
 - Concurrency (SRC-002 W2-001 / T-50): destructive batches execute under a cross-process lock scoped to the canonical scan root using OS-level byte-range locks (`msvcrt.locking` on Windows, `fcntl.flock` on POSIX) on open descriptors, automatically released by the kernel if an owner terminates.
 - Portability (P2 / T-64): guarded Windows Shell Recycle Bin calls (`hasattr(ctypes, "windll")`) for non-Windows environments and decoupled archive inventory validation from Git repository metadata.
 - Recovery integrity (P1 / T-66): recovery metadata keeps the acquired object's immutable size and fingerprint across every status transition; a restore with a verification engine refuses objects with a missing or mismatched fingerprint instead of skipping verification; a destructive step is refused unless its recovery receipt was persisted durably; the recovery journal lives in stable per-user application storage instead of a working-directory-relative path, with journal writes serialized against concurrent writers and published atomically.
-- Tests: 169 headless tests (150 above plus 19 T-68 recovery-transaction regressions covering corrupt-journal preservation, crash-at-boundary reconciliation via killed child processes, status-only receipt refusal, transient receipt failure, tampered-restore refusal, frozen identity, and occupied-destination preservation, with red-before-green evidence recorded against the pre-fix tree; Windows-native Recycle Bin acceptance unchanged).
+- Tests: 170 headless tests (151 above plus 19 T-68 recovery-transaction regressions covering corrupt-journal preservation, crash-at-boundary reconciliation via killed child processes, status-only receipt refusal, transient receipt failure, tampered-restore refusal, frozen identity, and occupied-destination preservation, with red-before-green evidence recorded against the pre-fix tree; Windows-native Recycle Bin acceptance unchanged).
 
 ## 0.0.4
 
