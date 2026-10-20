@@ -1,3 +1,3 @@
-done: ship v0.0.5 (content -> closure, tag v0.0.5)
+done: ship v0.0.6 (content -> closure, tag v0.0.6)
 remaining: nothing
 awaiting: nothing
