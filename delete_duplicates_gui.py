@@ -27,6 +27,7 @@ T-68 (SRC-005) recovery-transaction closure:
 import os
 import stat
 import ctypes
+import errno
 import re
 import shutil
 import threading
@@ -163,39 +164,87 @@ def _quarantine_name(base):
     return f".{base}.__vacq_{os.getpid()}_{_acquire_seq}"
 
 
-def _atomic_no_replace_move(src, dst):
-    """Move `src` to `dst`, refusing — never overwriting — an occupied `dst`.
+# REC-006 (P0-001): the move MUST be one atomic syscall that refuses an occupied
+# destination by itself. link-then-unlink is forbidden: os.unlink acts on the
+# pathname, not on the object the link created, so a replacement installed
+# between the two calls is destroyed.
+_RENAME_NOREPLACE = 0x1  # Linux >= 3.15 (btrfs, xfs, ext4 >= 5.12, overlayfs)
+_AT_FDCWD = -100
 
-    REC-006/FINDING E: a probe-then-rename loses on POSIX to any actor that
-    creates the destination between the check and the rename, silently
-    destroying its replacement. The reservation itself is the atomic step:
-    a hard link creates `dst` or fails with FileExistsError (POSIX and NTFS),
-    and the fallback reserves the name with O_CREAT|O_EXCL before copying.
-    Either way a live destination and the moved object both survive a refused
-    move; nothing is overwritten, on any platform.
+
+def _windows_atomic_move(src, dst):
+    """Windows no-replace move via MoveFileExW(0) — one syscall.
+
+    Without MOVEFILE_REPLACE_EXISTING the call FAILS when dst exists and leaves
+    src intact; cross-volume fails with ERROR_NOT_SAME_DEVICE. Neither outcome
+    destroys anything.
+    """
+    kernel32 = ctypes.windll.kernel32
+    kernel32.MoveFileExW.argtypes = [ctypes.c_wchar_p, ctypes.c_wchar_p,
+                                    ctypes.c_uint]
+    kernel32.MoveFileExW.restype = ctypes.c_int
+    if not kernel32.MoveFileExW(src, dst, 0):
+        raise ctypes.WinError()
+
+
+def _linux_atomic_move(src, dst):
+    """Linux atomic no-replace rename: renameat2(AT_FDCWD, src, AT_FDCWD, dst,
+    RENAME_NOREPLACE).
+
+    RENAME_NOREPLACE is the single atomic step — the destination is created or
+    refused as an indivisible syscall, and the source is consumed only on
+    success. Raises when the kernel or filesystem does not implement the flag,
+    so the caller can refuse instead of falling back to a destructive rename.
+    """
+    libc = ctypes.CDLL(None, use_errno=True)
+    if not hasattr(libc, "renameat2"):
+        raise OSError(errno.ENOSYS, "renameat2 unavailable")
+    rc = libc.renameat2(_AT_FDCWD, src.encode(), _AT_FDCWD,
+                        dst.encode(), _RENAME_NOREPLACE)
+    if rc != 0:
+        err = ctypes.get_errno()
+        raise OSError(err, os.strerror(err), src)
+
+
+def _source_inode_unchanged(path, st_before):
+    """True when `path` still names the same object `st_before` described.
+
+    This is the guard that makes a reserve-copy move safe: the copy is taken
+    from a stable open handle, so a pathname substituted afterwards is detected
+    here and left alone instead of being unlinked.
     """
     try:
-        os.link(src, dst)
-    except FileExistsError:
-        raise
+        st_now = os.stat(path)
     except OSError:
-        # Filesystem without links, or a cross-device pair: reserve the name
-        # exclusively, then copy, then drop the source only on full success.
-        fd = os.open(dst, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-        try:
-            with open(src, "rb") as fin, os.fdopen(fd, "wb") as fout:
-                shutil.copyfileobj(fin, fout)
-                fout.flush()
-                os.fsync(fout.fileno())
-        except OSError:
-            try:
-                os.remove(dst)
-            except OSError:
-                pass
-            raise
-        os.unlink(src)
+        return False
+    return (st_now.st_dev, st_now.st_ino) == (st_before.st_dev, st_before.st_ino)
+
+
+def _atomic_no_replace_move(src, dst):
+    """Move `src` to `dst` atomically, refusing — never overwriting — an occupied `dst`.
+
+    P0-001 / REC-006: the whole operation is one atomic syscall that reserves or
+    refuses the destination name itself. There is no separate unlink acting on a
+    mutable pathname, so a concurrent replacement installed at `src` can never be
+    destroyed by this move: either the object moves (src is consumed by the same
+    syscall), or the destination is occupied (src is preserved), or the operation
+    is refused (both survive).
+
+      * Windows: MoveFileExW without MOVEFILE_REPLACE_EXISTING.
+      * Linux:   renameat2 with RENAME_NOREPLACE.
+      * Otherwise: refuse. A filesystem that cannot provide the guarantee gets a
+        raised OSError, never a destructive link-then-unlink or a plain rename.
+    """
+    src = os.fspath(src)
+    dst = os.fspath(dst)
+    if platform.system() == "Windows":
+        _windows_atomic_move(src, dst)
         return
-    os.unlink(src)
+    if hasattr(ctypes, "CDLL"):
+        _linux_atomic_move(src, dst)
+        return
+    raise OSError(errno.ENOTSUP,
+                  "no atomic no-replace move on this platform")
 
 
 def prepare_acquisition(path, size=None, fingerprint=None):
@@ -416,17 +465,29 @@ def record_quarantine_metadata(qpath, original_path, size=None, fingerprint=None
                      "abandoned_before_rename", "identity_unverified",
                      "object_missing", "restored", "restore_refused_occupied"},
         "acquired": {"acquired", "trashing", "restored",
-                     "restore_refused_occupied", "acquired_recovered"},
+                     "restore_refused_occupied", "acquired_recovered",
+                     "restore_partial"},
         "acquired_recovered": {"acquired_recovered", "trashing", "restored",
-                               "restore_refused_occupied"},
+                               "restore_refused_occupied", "restore_partial"},
         "trashing": {"trashing", "deleted", "recycled", "restored",
-                     "restore_refused_occupied"},
+                     "restore_refused_occupied", "restore_partial"},
+        # P1-002: a restore whose cleanup or journal write failed. The
+        # destination may already hold the verified bytes, so the receipt must
+        # stay retryable rather than terminal.
+        "restore_partial": {"restore_partial", "restored",
+                            "restore_refused_occupied", "trashing",
+                            "acquired", "acquired_recovered"},
         "restore_refused_occupied": {"restore_refused_occupied", "restored",
                                     "trashing", "acquired", "acquired_recovered",
-                                    "prepared"},
+                                    "prepared", "restore_partial"},
         "restored": {"restored"},
         "deleted": {"deleted"},
-        "recycled": {"recycled"},
+        # A user restoring an item out of the real Recycle Bin lands here; the
+        # object is back on disk, so the receipt must be able to close as
+        # restored (P1-002). Otherwise a successful restore is forced to report
+        # a journal failure it did not have.
+        "recycled": {"recycled", "restored", "restore_partial",
+                     "restore_refused_occupied"},
         "abandoned_before_rename": {"abandoned_before_rename"},
         "identity_unverified": {"identity_unverified"},
         "object_missing": {"object_missing"},
@@ -731,10 +792,13 @@ def restore_quarantined_file(qpath, original_path=None, engine=None,
         if not allow_unverified:
             return False, "fingerprint_missing"
         return False, "receipt_missing"
-    # Stale receipts do not authorize a restore.
+    # Stale receipts do not authorize a restore. `restore_partial` is retried:
+    # the destination may already hold the verified bytes, so the caller must
+    # be able to converge rather than be stranded (P1-002 idempotency).
     if meta.get("status") not in ("acquired", "acquired_recovered", "prepared",
                                 "trashing", "recycled",
-                                "restore_refused_occupied"):
+                                "restore_refused_occupied",
+                                "restore_partial"):
         return False, "stale_receipt"
     dest = original_path or meta.get("original_path")
     if not dest:
@@ -822,6 +886,11 @@ def restore_quarantined_file(qpath, original_path=None, engine=None,
     tmp_path = None
 
     # Remove the original quarantine object only when its identity is unchanged.
+    # A failure here is a PARTIAL restore: the destination is installed, the
+    # quarantined source still exists and still requires recovery, so the
+    # transaction can NOT be reported as fully restored (P1-002).
+    cleanup_error = None
+    source_replaced = False
     try:
         st_now = os.stat(qpath)
         identity_now = (getattr(st_now, "st_dev", None),
@@ -830,10 +899,41 @@ def restore_quarantined_file(qpath, original_path=None, engine=None,
                         getattr(st_now, "st_mtime_ns", int(st_now.st_mtime * 1e9)))
         if identity_now == identity_before:
             os.remove(qpath)
-    except OSError:
-        pass
+        else:
+            # A newer pathname replacement occupies the quarantine name: it is
+            # NOT our object, so it is never removed (P1-002). The destination
+            # holds the verified bytes, so this is still a recovery-required
+            # outcome: the receipt must name the live object that remains.
+            source_replaced = True
+    except OSError as e:
+        cleanup_error = e
 
-    record_quarantine_metadata(qpath, dest, status="restored")
+    if cleanup_error is not None:
+        # P1-002: the destination is installed but the quarantine source is
+        # still on disk. Stamp the durable receipt as partial, then report the
+        # exact class so a retry converges instead of returning a false success.
+        if not record_quarantine_metadata(qpath, dest,
+                                          status="restore_partial"):
+            return False, "journal_write_failed"
+        return False, "partial_recovery_required"
+
+    if source_replaced:
+        # The quarantine name now holds a different object. It must survive
+        # (it is not ours to delete), so the transaction cannot complete.
+        if not record_quarantine_metadata(qpath, dest,
+                                          status="restore_refused_occupied"):
+            return False, "journal_write_failed"
+        return False, "partial_recovery_required"
+
+    if not record_quarantine_metadata(qpath, dest, status="restored"):
+        # The receipt could not be made durable. The filesystem already agrees
+        # with the filesystem truth (destination installed, source gone), but
+        # the journal no longer matches it — never claim success.
+        return False, "journal_write_failed"
+    # Full success: the destination holds the verified bytes, the quarantine
+    # source is gone, and the receipt durably records the restore. The success
+    # payload stays the restored destination path so existing callers can use
+    # it directly.
     return True, dest
 
 

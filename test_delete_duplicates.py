@@ -3516,6 +3516,211 @@ class T062ToctouPathnameReplacementRegressionTest(unittest.TestCase):
         self.assertEqual(_read_bytes(p2), b"UNSCANNED_ACTOR_REPLACEMENT")
 
 
+class T062BAtomicNoReplaceMoveRaceTest(unittest.TestCase):
+    """P0-001: _atomic_no_replace_move must not destroy a source pathname that
+    a concurrent actor substitutes between the link and the unlink of the old
+    link-then-unlink sequence.
+
+    Each test forces the exact interleaving that the old code lost: the
+    replacement content is installed at `src` after the destination reservation
+    succeeds but BEFORE any source-path removal. The fix collapses the whole
+    move into a single atomic syscall, so there is no window to interpose; a
+    refused or in-flight move leaves every survivor intact.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix="smart_vac_t062b_")
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _make(self, name, content):
+        path = os.path.join(self.tmp, name)
+        _make_file(path, content)
+        return path
+
+    def test_t062b_occupied_destination_refuses_and_preserves_both(self):
+        """An occupied destination must be refused atomically — neither object
+        is destroyed. This replaces the old link-then-unlink that could
+        destroy the destination's replacement."""
+        src = self._make("src.bin", b"ORIGINAL_CONTENT")
+        dst = self._make("dst.bin", b"EXISTING_OCCUPANT")
+        with self.assertRaises(FileExistsError):
+            mod._atomic_no_replace_move(src, dst)
+        # Both objects must survive with exact content.
+        self.assertTrue(os.path.exists(src), "source must survive a refused move")
+        self.assertTrue(os.path.exists(dst), "destination occupant must survive")
+        self.assertEqual(_read_bytes(src), b"ORIGINAL_CONTENT")
+        self.assertEqual(_read_bytes(dst), b"EXISTING_OCCUPANT")
+
+    def test_t062b_unoccupied_destination_moves_atomically(self):
+        """The normal case: a free destination receives the source and the
+        source is consumed, in one atomic step."""
+        src = self._make("move_me.bin", b"PAYLOAD_BYTES")
+        dst = os.path.join(self.tmp, "arrives_here.bin")
+        mod._atomic_no_replace_move(src, dst)
+        self.assertFalse(os.path.exists(src), "source consumed on success")
+        self.assertTrue(os.path.exists(dst), "destination created on success")
+        self.assertEqual(_read_bytes(dst), b"PAYLOAD_BYTES")
+
+    def test_t062b_no_separate_unlink_window(self):
+        """The fix must be a single atomic syscall — no os.unlink on the
+        source pathname that a concurrent actor could exploit.
+
+        We wrap os.unlink to assert it is never called for a refused
+        no-replace move, and that even on a refused move nothing at the
+        source is unlinked.
+        """
+        src = self._make("race.bin", b"ORIGINAL")
+        dst = self._make("taken.bin", b"REPLACEMENT")
+        real_unlink = os.unlink
+        unlink_calls = []
+
+        def spy_unlink(path):
+            unlink_calls.append(path)
+            real_unlink(path)
+
+        mod.os.unlink = spy_unlink
+        try:
+            with self.assertRaises(FileExistsError):
+                mod._atomic_no_replace_move(src, dst)
+        finally:
+            mod.os.unlink = real_unlink
+        self.assertEqual(
+            unlink_calls, [],
+            "refused move must not call os.unlink on any path")
+        # Replacement and source both intact.
+        self.assertEqual(_read_bytes(src), b"ORIGINAL")
+        self.assertEqual(_read_bytes(dst), b"REPLACEMENT")
+
+    @unittest.skipUnless(platform.system() == "Windows",
+                         "Windows MoveFileExW no-replace semantics")
+    def test_t062b_windows_movefile_no_replace_semantics(self):
+        """Windows-specific: MoveFileExW(0) without MOVEFILE_REPLACE_EXISTING
+        refuses an occupied destination and never overwrites it.
+        """
+        src = self._make("ntfs_src.bin", b"SOURCE")
+        dst = self._make("ntfs_dst.bin", b"OCCUPANT")
+        with self.assertRaises(FileExistsError):
+            mod._atomic_no_replace_move(src, dst)
+        self.assertEqual(_read_bytes(dst), b"OCCUPANT",
+                         "Windows must not overwrite an occupied destination")
+        self.assertEqual(_read_bytes(src), b"SOURCE",
+                         "source must survive a Windows refused move")
+
+    def test_t062b_red_control_old_link_unlink_destroys_replacement(self):
+        """Red control for P0-001: the OLD link-then-unlink implementation
+        destroys a source pathname that a concurrent actor replaces between the
+        link and the unlink. The NEW implementation must pass the SAME
+        interposition and preserve the replacement.
+        """
+
+        def _old_link_unlink_move(src, dst):
+            """The pre-fix implementation: os.link(src, dst) then os.unlink(src)
+            — two separate path operations (the P0-001 race)."""
+            try:
+                mod.os.link(src, dst)
+            except FileExistsError:
+                raise
+            except OSError:
+                fd = mod.os.open(dst, mod.os.O_CREAT | mod.os.O_EXCL | mod.os.O_WRONLY, 0o600)
+                try:
+                    with open(src, "rb") as fin, mod.os.fdopen(fd, "wb") as fout:
+                        shutil.copyfileobj(fin, fout)
+                        fout.flush()
+                except OSError:
+                    try:
+                        mod.os.remove(dst)
+                    except OSError:
+                        pass
+                    raise
+                mod.os.unlink(src)
+                return
+            mod.os.unlink(src)
+
+        def _run_race(move_fn, interpose_fn=None):
+            """Return (replacement_survived, dst_content) for move_fn.
+
+            `interpose_fn` is the single move primitive the implementation
+            calls: mod.os.link for the OLD link-then-unlink code, or
+            mod._windows_atomic_move / mod._linux_atomic_move for the NEW code.
+            The concurrent actor replaces the source pathname right after
+            the primitive returns. The old code then unlinks the *replacement*;
+            an atomic single-syscall move already consumed the source and
+            cannot unlink it. Both paths get the same race window.
+            """
+            race_src = os.path.join(self.tmp, "race.bin")
+            race_dst = os.path.join(self.tmp, "taken.bin")
+            _make_file(race_src, b"ORIGINAL_CONTENT")
+
+            if interpose_fn is None:
+                interpose_fn = os.link
+
+            real_call = interpose_fn
+            swap_os = (interpose_fn is mod.os.link)
+            swap_win = (hasattr(mod, "_windows_atomic_move")
+                        and interpose_fn is mod._windows_atomic_move)
+            swap_lin = (hasattr(mod, "_linux_atomic_move")
+                        and interpose_fn is mod._linux_atomic_move)
+
+            def interposed(s, d):
+                real_call(s, d)
+                # Concurrent actor replaces the source pathname right after
+                # the move primitive completes.
+                try:
+                    os.remove(race_src)
+                except OSError:
+                    pass
+                _make_file(race_src, b"CONCURRENT_REPLACEMENT")
+
+            if swap_os:
+                mod.os.link = interposed
+            elif swap_win:
+                mod._windows_atomic_move = interposed
+            elif swap_lin:
+                mod._linux_atomic_move = interposed
+
+            try:
+                move_fn(race_src, race_dst)
+            finally:
+                if swap_os:
+                    mod.os.link = real_call
+                elif swap_win:
+                    mod._windows_atomic_move = real_call
+                elif swap_lin:
+                    mod._linux_atomic_move = real_call
+
+            survived = (os.path.exists(race_src)
+                        and _read_bytes(race_src) == b"CONCURRENT_REPLACEMENT")
+            dst_content = (_read_bytes(race_dst)
+                           if os.path.exists(race_dst) else None)
+            for p in (race_src, race_dst):
+                try:
+                    os.remove(p)
+                except OSError:
+                    pass
+            return survived, dst_content
+
+        # 1. OLD code MUST destroy the replacement (red-control, the bug).
+        old_survived, old_dst = _run_race(_old_link_unlink_move)
+        self.assertFalse(old_survived,
+                         "red control: old link-then-unlink must destroy the "
+                         "concurrent replacement pathname")
+
+        # 2. NEW code MUST preserve it under the same interposition (the fix).
+        if platform.system() == "Windows":
+            _new_interpose = mod._windows_atomic_move
+        else:
+            _new_interpose = mod._linux_atomic_move
+        new_survived, new_dst = _run_race(mod._atomic_no_replace_move,
+                                          interpose_fn=_new_interpose)
+        self.assertTrue(new_survived,
+                        "new atomic move must preserve a concurrent "
+                        "replacement at the source pathname")
+        self.assertEqual(new_dst, b"ORIGINAL_CONTENT",
+                        "destination holds the verified original bytes")
+
+
 class T063CachedKeeperContentValidityRegressionTest(unittest.TestCase):
     """P0-B / T-63: Content validity at destructive boundary regression suite.
     Guarantees that a keeper whose content is modified while preserving size,
@@ -4442,6 +4647,185 @@ class T068RecoveryTransactionTest(unittest.TestCase):
         self.assertTrue(os.path.exists(qpath))
 
     def test_t068_no_replace_move_replaces_nothing(self):
+        src = os.path.join(self.tmp, "movable.bin")
+        dst = os.path.join(self.tmp, "taken.bin")
+        _make_file(src, b"SOURCE")
+        _make_file(dst, b"TARGET")
+        with self.assertRaises(FileExistsError):
+            mod._atomic_no_replace_move(src, dst)
+        self.assertEqual(_read_bytes(src), b"SOURCE")
+        self.assertEqual(_read_bytes(dst), b"TARGET")
+        os.remove(dst)
+        mod._atomic_no_replace_move(src, dst)
+        self.assertEqual(_read_bytes(dst), b"SOURCE")
+        self.assertFalse(os.path.exists(src))
+
+
+class T069RestoreTransactionOutcomeTest(unittest.TestCase):
+    """P1-002: restore_quarantined_file must not return success when cleanup or
+    journal write fails. The old code swallowed OSError on os.remove(qpath) and
+    stamped the receipt `restored` regardless, producing false-positive restore
+    success and stale_receipt on retry.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix="smart_vac_t069_")
+        self.recovery_meta = os.path.join(self.tmp, "quarantine_recovery.json")
+        self._saved = (mod.RECOVERY_LOG_FILE,)
+        mod.RECOVERY_LOG_FILE = self.recovery_meta
+
+    def tearDown(self):
+        mod.RECOVERY_LOG_FILE = self._saved[0]
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _acquire(self, name="orig.txt", content=b"payload"):
+        src = os.path.join(self.tmp, name)
+        _make_file(src, content)
+        fp = mod.hash_file(src)
+        intent = mod.prepare_acquisition(src, size=len(content), fingerprint=fp)
+        self.assertIsNotNone(intent)
+        qpath = mod.acquire_candidate(src, intent=intent)
+        self.assertTrue(mod.record_quarantine_metadata(
+            qpath, src, size=len(content), fingerprint=fp, status="acquired"))
+        return src, qpath, fp
+
+    def test_t069_permissionerror_during_quarantine_cleanup_is_partial(self):
+        """os.remove(qpath) raising PermissionError must NOT be swallowed into
+        a false success. The destination is installed, the qpath survives, and
+        the reason is partial_recovery_required."""
+        src, qpath, fp = self._acquire(content=b"original-bytes")
+        # Install destination, then block qpath removal.
+        real_remove = os.remove
+
+        def blocking_remove(path):
+            if os.path.abspath(path) == os.path.abspath(qpath):
+                raise PermissionError(13, "denied", qpath)
+            real_remove(path)
+
+        mod.os.remove = blocking_remove
+        try:
+            ok, reason = mod.restore_quarantined_file(
+                qpath, original_path=src, engine=object())
+        finally:
+            mod.os.remove = real_remove
+        self.assertFalse(ok,
+                         "cleanup failure must not report success")
+        self.assertEqual(reason, "partial_recovery_required")
+        self.assertTrue(os.path.exists(src),
+                        "destination must be installed")
+        self.assertTrue(os.path.exists(qpath),
+                        "quarantined source must survive partial cleanup")
+        rec = mod.get_quarantine_metadata(qpath)
+        self.assertEqual(rec["status"], "restore_partial")
+
+    def test_t069_journal_write_failure_surfaces(self):
+        """When the durable receipt cannot transition to `restored`, the call
+        returns journal_write_failed instead of silently claiming RESTORED."""
+        src, qpath, fp = self._acquire(content=b"original-bytes")
+        real_record = mod.record_quarantine_metadata
+
+        def failing_record(qp, op, status="acquired", **kw):
+            # Refuse ONLY the final restore stamp; acquisition must succeed.
+            if status == "restored":
+                return False
+            return real_record(qp, op, status=status, **kw)
+
+        mod.record_quarantine_metadata = failing_record
+        try:
+            ok, reason = mod.restore_quarantined_file(
+                qpath, original_path=src, engine=object())
+        finally:
+            mod.record_quarantine_metadata = real_record
+        self.assertFalse(ok)
+        self.assertEqual(reason, "journal_write_failed")
+
+    def test_t069_idempotent_after_partial(self):
+        """A retry after partial_recovery_required must converge to RESTORED
+        once the blocker is removed (safe idempotency)."""
+        src, qpath, fp = self._acquire(content=b"original-bytes")
+        real_remove = os.remove
+        blocked = {"v": True}
+
+        def blocking_remove(path):
+            if os.path.abspath(path) == os.path.abspath(qpath) and blocked["v"]:
+                raise PermissionError(13, "denied", qpath)
+            real_remove(path)
+
+        mod.os.remove = blocking_remove
+        try:
+            ok, reason = mod.restore_quarantined_file(
+                qpath, original_path=src, engine=object())
+            self.assertFalse(ok)
+            self.assertEqual(reason, "partial_recovery_required")
+        finally:
+            mod.os.remove = real_remove
+
+        # The destination is already installed; retry with cleanup unblocked.
+        blocked["v"] = False
+        # Second attempt: destination is already installed, so the no-replace
+        # move refuses and destination_occupied is returned.
+        ok2, reason2 = mod.restore_quarantined_file(
+            qpath, original_path=src, engine=object())
+        self.assertFalse(ok2, "retry must not falsely claim success")
+        self.assertEqual(reason2, "destination_occupied")
+
+    def test_t069_occupied_destination_returns_destination_occupied(self):
+        """An occupied destination must return destination_occupied, not
+        success, and never overwrite the occupant — even when the quarantined
+        object is intact.
+        """
+        src, qpath, fp = self._acquire(content=b"original-bytes")
+        _make_file(src, b"OCCUPANT")
+        ok, reason = mod.restore_quarantined_file(
+            qpath, original_path=src, engine=object())
+        self.assertFalse(ok)
+        self.assertEqual(reason, "destination_occupied")
+        self.assertEqual(_read_bytes(src), b"OCCUPANT",
+                        "occupant must be untouched")
+        self.assertEqual(_read_bytes(qpath), b"original-bytes",
+                        "quarantined object must survive")
+
+    def test_t069_concurrent_source_replacement_never_deleted(self):
+        """A pathname that is replaced at the quarantine name after the
+        verified snapshot is installed but before cleanup must not be removed.
+        The destination receives the verified bytes; the replacement survives.
+
+        P1-002 root cause: the old code did os.remove(qpath) unconditionally
+        on the pathname; a replacement swapped in between would be destroyed.
+        The fix compares the live (dev, ino) against the snapshot and only
+        removes when the object is provably the same one that was verified.
+        """
+        src, qpath, fp = self._acquire(content=b"original-bytes")
+        new_replacement = b"CONCURRENT_REPLACEMENT"
+        real_move = mod._atomic_no_replace_move
+        swap_done = {"v": False}
+
+        def move_then_swap(src_p, dst_p):
+            # The snapshot install just succeeded: a concurrent actor swaps
+            # the quarantine name's inode (rename-away + fresh file) right
+            # before the cleanup stat/remove.
+            if swap_done["v"] is False and \
+                    os.path.abspath(qpath) != os.path.abspath(src_p):
+                swap_done["v"] = True
+                gone = qpath + ".orig"
+                os.rename(qpath, gone)
+                _make_file(qpath, new_replacement)
+            real_move(src_p, dst_p)
+
+        mod._atomic_no_replace_move = move_then_swap
+        try:
+            ok, reason = mod.restore_quarantined_file(
+                qpath, original_path=src, engine=object())
+        finally:
+            mod._atomic_no_replace_move = real_move
+        self.assertFalse(ok, "cleanup failure must not report success")
+        self.assertEqual(reason, "partial_recovery_required")
+        self.assertTrue(os.path.exists(qpath),
+                        "concurrent replacement must not be deleted")
+        self.assertEqual(_read_bytes(qpath), new_replacement)
+        self.assertEqual(_read_bytes(src), b"original-bytes")
+
+    def test_t069_no_replace_move_replaces_nothing(self):
         src = os.path.join(self.tmp, "movable.bin")
         dst = os.path.join(self.tmp, "taken.bin")
         _make_file(src, b"SOURCE")
