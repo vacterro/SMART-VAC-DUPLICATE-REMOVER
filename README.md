@@ -54,3 +54,14 @@ MIT License
 
 ## Support
 For issues and feature requests, please use the GitHub repository.
+
+## Verification
+
+Run `python test_delete_duplicates.py` for the headless application and safety
+regressions. The suite uses disposable files and mocked UI collaborators.
+
+Maintainer archive checks remain available separately:
+`python maintenance/verify_private_archives.py --archive-root PRIVATE_CHECKPOINT`.
+They require the maintainer's private protocol/archive carriers. Those records
+are deliberately absent from the public source distribution; never add them
+to a public commit to satisfy an archive check.
